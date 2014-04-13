@@ -1,0 +1,4 @@
+./app.json
+./build.xml
+./change-app-name.sh
+./README.md
