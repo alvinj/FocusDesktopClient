@@ -2,13 +2,16 @@
  * This is the main "viewport" for the application.
  * A viewport is like a Java JFrame, you pretty much want just one.
  */
-Ext.define('Focus.view.MyViewport', {
+Ext.define('Focus.view.MainViewport', {
     extend: 'Ext.container.Viewport',
-    alias: 'widget.mainviewport',
+    alias: 'widget.mainViewport',
 
     requires: [
         'Focus.view.Header',
-        'Focus.view.MainPanel'
+        'Focus.view.MainTabPanel',
+        'Focus.view.TaskListPanel',
+        'Focus.view.FooPanel',
+        'Focus.view.CurrentTask'
     ],
 
     layout: {
@@ -21,7 +24,7 @@ Ext.define('Focus.view.MyViewport', {
             region: 'north'
         },
         {
-            xtype: 'mainpanel',
+            xtype: 'mainTabPanel',
             region: 'center'
         },
         {

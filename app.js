@@ -29,16 +29,23 @@ Ext.application({
 
     views: [
         // note: when do i need these?
-        // 'Main',
-        // 'Viewport',
+        'MainTabPanel',
+        'MainViewport'
     ],
 
-    // stores: [
-    //     'Stocks'
-    // ],
+    models: [
+        'Project'
+    ],
+
+    stores: [
+        'Projects'
+    ],
 
     controllers: [
-        'Login'
+        'Main',
+        'Login',
+        'Projects',
+        'Tasks'
     ],
 
     splashscreen: {},

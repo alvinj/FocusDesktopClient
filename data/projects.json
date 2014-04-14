@@ -1,0 +1,8 @@
+{
+    'success': true,
+    'results': [
+        {'id': 1, 'name': 'Focus'}, 
+        {'id': 2, 'name': 'Finance'}, 
+        {'id': 3, 'name': 'aa.com'}
+    ]
+}

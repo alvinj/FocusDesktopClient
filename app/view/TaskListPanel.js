@@ -1,19 +1,17 @@
-Ext.define('Focus.view.MainPanel', {
-    extend: 'Ext.tab.Panel',
-    alias: 'widget.mainpanel',
+Ext.define('Focus.view.TaskListPanel', {
+    extend: 'Ext.panel.Panel',
+    alias: 'widget.taskListPanel',
 
     requires: [
         'Ext.ux.IFrame'
     ],
 
-    activeTab: 0,
-
     items: [
         {
             xtype: 'panel',
             closable: false,
-            iconCls: 'home',
-            title: 'Home',
+            //iconCls: 'home',
+            //title: 'Tasks',
             layout: 'fit'
         }
     ]

@@ -4,7 +4,7 @@ Ext.define('Focus.controller.Login', {
     requires: [
         'Packt.util.MD5',
         'Packt.util.Alert',
-        'Focus.view.MyViewport',
+        'Focus.view.MainViewport',
         'Packt.util.Util',
         'Packt.util.SessionMonitor'
     ],
@@ -15,6 +15,7 @@ Ext.define('Focus.controller.Login', {
     ],
 
     init: function(application) {
+        console.log("Login::init called");
         this.control({
             "login form button#submit": {
                 click: this.onButtonClickSubmit
@@ -59,7 +60,10 @@ Ext.define('Focus.controller.Login', {
                     var result = Packt.util.Util.decodeJSON(conn.responseText);
                     if (result.success) {
                         login.close();
-                        Ext.create('Focus.view.MyViewport');
+                        Ext.create('Focus.view.MainViewport');
+                        //var mainController = this.getController('Main');
+                        //mainController.init();
+                        //Ext.create('Focus.controller.Main');
                         Packt.util.SessionMonitor.start();
                     } else {
                         // TODO get the 'msg' from the json and display it
@@ -110,7 +114,7 @@ Ext.define('Focus.controller.Login', {
             success: function(conn, response, options, eOpts){
                 var result = Packt.util.Util.decodeJSON(conn.responseText);
                 if (result.success) {
-                    button.up('mainviewport').destroy();
+                    button.up('MainViewport').destroy();
                     window.location.reload();
                 } else {
                     Packt.util.Util.showErrorMsg(conn.responseText);
