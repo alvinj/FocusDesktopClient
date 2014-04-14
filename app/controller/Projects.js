@@ -41,7 +41,9 @@ Ext.define('Focus.controller.Projects', {
             // the MainTabPanel is rendered when the MainViewport is rendered
             // by the Login controller.
             "mainTabPanel": {
-                render: this.onMainTabPanelRender
+                render: this.onMainTabPanelRender,
+                //click: this.onMainTabPanelClick,
+                tabchange: this.onMainTabPanelTabChange,
             }
         });
     },
@@ -53,6 +55,11 @@ Ext.define('Focus.controller.Projects', {
         projectsStore.load();
     },
 
+    onMainTabPanelTabChange: function(mainTabPanel, panel) {
+        // panel (title: Finance; alias: widget.finance, etc.)
+        console.log(panel.title);
+    },
+    
     /**
      * Handle the rendering of the MainTabPanel.
      * As it's rendered, dynamically add one tab for each project.
@@ -64,15 +71,31 @@ Ext.define('Focus.controller.Projects', {
         // projectsStore.load();
         // 2) create a tab for each project
         var mainTabPanel = this.getMainTabPanel();
+        //var tabsArray = new Array();
         projectsStore.each(function(record) {
             console.log(record.data.name);
+            //tabsArray.push(record.data.name);
             var tab = mainTabPanel.add({
                 xtype: 'panel',
                 closable: true,
-                title: record.data.name
+                title: record.data.name,
+                alias: 'widget.' + record.data.name.toLowerCase(),
+                iconCls: record.data.name.toLowerCase(),  // renders 'class="finance"'
+                listeners : {
+                    click: function () { 
+                        console.log("YOU CLICKED A TAB !!!");
+                    },
+                    // beforeclose : function(tab) {
+                    //     tab.removeAll();
+                    //     tab.destroy();
+                    //     return true;
+                    // }
+                }
             });
         });
         mainTabPanel.setActiveTab(0);
+        // TODO i think i need to create these tabs as an array so i can
+        // access them, and also know which one is in the foreground
     }
 
 });

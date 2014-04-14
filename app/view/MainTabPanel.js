@@ -6,16 +6,6 @@ Ext.define('Focus.view.MainTabPanel', {
         'Ext.ux.IFrame'
     ],
 
-    activeTab: 0,
-
-    // items: [
-    //     {
-    //         xtype: 'panel',
-    //         closable: false,
-    //         iconCls: 'home',
-    //         title: 'Work',
-    //         layout: 'fit'
-    //     }
-    // ]
+    activeTab: 0
 
 });
