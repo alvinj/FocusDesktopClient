@@ -122,6 +122,57 @@ Ext.define('Focus.controller.Projects', {
         var grp = new Ext.form.CheckboxGroup({
             //fieldLabel: 'CheckboxGroup',
             columns: 1,
+            id: nameOfId,
+            itemId: nameOfId,
+            listeners: {
+                // may only be available after the 'load' event; see
+                // http://pritomkumar.blogspot.com/2013/08/extjs-add-checkbox-group-to-panel-on-fly.html
+                check: {
+                    element: 'el', //bind to the underlying el property on the panel
+                    foo: function (clickedObject, isChecked){
+                        console.log(clickedObject);
+                        console.log(isChecked);
+                        console.log("Check box check status changed.");
+                        // var group = Ext.getCmp (nameOfId);
+                        // var length = group.items.getCount ();
+                        // var isCheck = group.items.items[0].checked;
+                    }
+                },
+                change: {
+                    element: 'el', //bind to the underlying el property on the panel
+                    foo: function (field, newVal, oldVal){
+                        console.log('CHNAGE!');
+                        console.log(field);
+                    }
+                },
+                // // NOT WORKING
+                // change: function(foo) {
+                //     console.log('CHANGE!');
+                // },
+                // this works
+                afterrender: function(foo) {
+                    console.log('afterrender');
+                },
+                // change: {
+                //     element: 'el', //bind to the underlying el property on the panel
+                //     fn: function(cb, checked) {
+                //         //Ext.getCmp('myTextField').setDisabled(!checked);
+                //         Ext.Msg.alert('You changed something'); 
+                //         console.log('CHECKED: ' + checked);
+                //     },
+                //     fn2: function(cb, newVal, oldVal) {
+                //         //Ext.getCmp('myTextField').setDisabled(!checked);
+                //         console.log('CHECKED: ' + newVal);
+                //     }
+                // },
+                click: {
+                    element: 'el', //bind to the underlying el property on the panel
+                    fn: function(){ 
+                        //Ext.Msg.alert('You clicked something');
+                        console.log('CLICKED: (something)');
+                    }
+                }
+             }
             // items: [
             //     {boxLabel: 'Do foo', name: 'task', inputValue: '1', id: 'box1', checked: true},
             //     {boxLabel: 'Do bar-baz', name: 'task', inputValue: '1', id: 'box1', checked: false}
@@ -140,7 +191,14 @@ Ext.define('Focus.controller.Projects', {
             name: 'task',
             id: 'box' + count,
             inputValue: '1', // TODO
-            checked: false  
+            checked: false,
+            // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
+            listeners: {
+                change: function(checkbox, newValue, oldValue, eOpts) {
+                    console.log('CHECKBOX CHANGED');
+                    console.log(this.boxLabel);  // this works
+                }
+            }            
         });
         return checkbox;
     },
