@@ -2,8 +2,7 @@ Ext.define('Focus.controller.Projects', {
     extend: 'Ext.app.Controller',
 
     requires: [
-        'VP.util.Utils',
-        'Focus.controller.ProjectUtils'
+        'VP.util.Utils'
     ],
 
     stores: [
@@ -65,7 +64,8 @@ Ext.define('Focus.controller.Projects', {
     },
 
     handleTabChange: function(tabName, panel) {
-        var tasksStore = this.getTasksStore();
+        var me = this;  // need this to access `this` inside `each` loop below
+        var tasksStore = me.getTasksStore();
         tasksStore.load();
         // var content = '<ul>';
         // // TODO render those tasks as a list of checkboxes onto the panel
@@ -78,20 +78,92 @@ Ext.define('Focus.controller.Projects', {
         // panel.body.update(content);
         // panel.doLayout();
 
-        var group = Focus.controller.ProjectUtils.createCheckboxGroup('foo');
+        // TEXTFIELD
+        var txt = me.createTextField();
+        me.addTextfieldListener(txt);
+        panel.add(txt);
+
+        // CHECKBOXES
+        var group = me.createCheckboxGroup('foo');
         //VP.util.Utils.dumpObject(group);
         //panel.body.update(group);
         var count = 1;
+        // TODO i don't know how to reference a method in this class/object
+        // inside a block like this; a 'this' reference does not work by itself;
+        // if i remember right, i need to pass something else to the function.
         tasksStore.each(function(record) {
             var task = record.data.description;
             // TODO how to refer to this shorthand???
-            var checkbox = Focus.controller.ProjectUtils.createCheckbox(task, count++);
-            Focus.controller.ProjectUtils.addCheckboxToGroup(group, checkbox);
+            var checkbox = me.createCheckbox(task, count++);
+            //Focus.controller.ProjectUtils.addCheckboxToGroup(group, checkbox);
+            me.addCheckboxToGroup(group, checkbox);
         });
         panel.add(group);
         panel.doLayout();
     },
+
+    createTextField: function() {
+        return Ext.create('Ext.form.field.Text', {
+            fieldLabel: 'Task:',
+            name: 'taskfield',
+            enableKeyEvents: true
+        })
+    },
+
+    addTextfieldListener: function(textfield) {
+        textfield.on('keyup', function(field, event, options) {
+            if (event.getCharCode() === event.ENTER) {
+               Ext.Msg.alert('Alert', 'Task: ' + field.getValue()); 
+            }
+        })
+    },
     
+    createCheckboxGroup: function(nameOfId) {
+        var grp = new Ext.form.CheckboxGroup({
+            //fieldLabel: 'CheckboxGroup',
+            columns: 1,
+            // items: [
+            //     {boxLabel: 'Do foo', name: 'task', inputValue: '1', id: 'box1', checked: true},
+            //     {boxLabel: 'Do bar-baz', name: 'task', inputValue: '1', id: 'box1', checked: false}
+            // ]
+        });
+        return grp;
+    },
+
+    // TODO add a listener to each box
+    createCheckbox: function(taskName, count) {
+        //var group = Ext.getCmp('conditions');
+        // TODO the 'id' must be more unique; add projectName or tabName or tabNumber
+        // TODO its possible 'name' may also need to be more unique
+        var checkbox = new Ext.form.field.Checkbox({
+            boxLabel: taskName,
+            name: 'task',
+            id: 'box' + count,
+            inputValue: '1', // TODO
+            checked: false  
+        });
+        return checkbox;
+    },
+
+    addCheckboxToGroup: function(group, checkbox) {
+        //var col = group.panel.items.get(group.items.getCount() % group.panel.items.getCount());
+        group.items.add(checkbox);
+        //col.add(checkbox);
+        //group.panel.doLayout();
+    },
+
+    // Usage: var string2 = stringWithoutSpaces(string1);
+    stringWithoutSpaces: function(string) {
+        // str.replace(/\s/g, '');
+        return string.replace(/ /g,'');
+    },
+
+    capitalizeAllWords: function(str) {
+        return str.replace(/\w\S*/g, function(txt){
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        });
+    },
+
     /**
      * Handle the rendering of the MainTabPanel.
      * As it's rendered, dynamically add one tab for each project.
@@ -130,21 +202,6 @@ Ext.define('Focus.controller.Projects', {
         // TODO i think i need to create these tabs as an array so i can
         // access them, and also know which one is in the foreground
     },
-
-    // statics : {
-    //     // TODO pass an array into this function
-    //     createCheckbox: function(taskName, count) {
-    //         //var group = Ext.getCmp('conditions');
-    //         var checkbox = new Ext.form.field.Checkbox({
-    //             boxLabel: taskName,
-    //             name: 'task',
-    //             id: 'box' + count,      // TODO
-    //             inputValue: '1', // TODO
-    //             checked: false  
-    //         });
-    //         return checkbox;
-    //     }
-    // }
 
 });
 
