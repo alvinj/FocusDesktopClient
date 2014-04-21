@@ -34,11 +34,13 @@ Ext.application({
     ],
 
     models: [
-        'Project'
+        'Project',
+        'Task'
     ],
 
     stores: [
-        'Projects'
+        'Projects',
+        'Tasks'
     ],
 
     controllers: [

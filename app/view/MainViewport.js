@@ -8,10 +8,7 @@ Ext.define('Focus.view.MainViewport', {
 
     requires: [
         'Focus.view.Header',
-        'Focus.view.MainTabPanel',
-        'Focus.view.TaskListPanel',
-        'Focus.view.FooPanel',
-        'Focus.view.CurrentTask'
+        'Focus.view.MainTabPanel'
     ],
 
     layout: {

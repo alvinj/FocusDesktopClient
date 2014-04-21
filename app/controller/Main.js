@@ -6,23 +6,13 @@ Ext.define('Focus.controller.Main', {
     ],
 
     views: [
-        'MainTabPanel',
-        'TaskListPanel',
-        'FooPanel'
+        'MainTabPanel'
     ],
 
     refs: [
         {
             ref: 'mainTabPanel',
             selector: 'mainTabPanel'
-        },
-        {
-            ref: 'taskListPanel',
-            selector: 'taskListPanel'
-        },
-        {
-            ref: 'fooPanel',
-            selector: 'fooPanel'
         }
     ],
 

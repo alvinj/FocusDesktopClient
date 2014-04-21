@@ -2,7 +2,11 @@ Ext.define('Focus.controller.Tasks', {
     extend: 'Ext.app.Controller',
 
     requires: [
-        // 'Packt.util.MD5',
+        'VP.util.Utils'
+    ],
+
+    stores: [
+        'Tasks'
     ],
 
     views: [
