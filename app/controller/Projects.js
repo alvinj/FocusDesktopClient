@@ -79,13 +79,14 @@ Ext.define('Focus.controller.Projects', {
         // panel.doLayout();
 
         // TEXTFIELD
+        // TODO don't add textfield if it already exists
         var txt = me.createTextField();
         me.addTextfieldListener(txt);
         panel.add(txt);
 
         // CHECKBOXES
-        var group = me.createCheckboxGroup('foo');
-        //VP.util.Utils.dumpObject(group);
+        var groupItemId = me.makeGroupItemIdName(tabName);
+        var group = me.createCheckboxGroup(groupItemId);
         //panel.body.update(group);
         var count = 1;
         // TODO i don't know how to reference a method in this class/object
@@ -93,13 +94,23 @@ Ext.define('Focus.controller.Projects', {
         // if i remember right, i need to pass something else to the function.
         tasksStore.each(function(record) {
             var task = record.data.description;
-            // TODO how to refer to this shorthand???
             var checkbox = me.createCheckbox(task, count++);
-            //Focus.controller.ProjectUtils.addCheckboxToGroup(group, checkbox);
             me.addCheckboxToGroup(group, checkbox);
         });
         panel.add(group);
         panel.doLayout();
+    },
+
+    // each checkbox group must have a different itemId. make the itemId from the
+    // projectName, which must be unique per user.
+    makeGroupItemIdName: function(projectName) {
+        return VP.util.Utils.removeSpaces(VP.util.Utils.capitalizeEachWord(projectName));
+    },
+
+    createLegalIdNameFromString: function(s) {
+        var x = VP.util.Utils.capitalizeEachWord(s);
+        var y = VP.util.Utils.stripNonWordCharacters(x);
+        return VP.util.Utils.removeSpaces();
     },
 
     createTextField: function() {
@@ -107,7 +118,7 @@ Ext.define('Focus.controller.Projects', {
             fieldLabel: 'Task:',
             name: 'taskfield',
             enableKeyEvents: true
-        })
+        });
     },
 
     addTextfieldListener: function(textfield) {
@@ -115,7 +126,7 @@ Ext.define('Focus.controller.Projects', {
             if (event.getCharCode() === event.ENTER) {
                Ext.Msg.alert('Alert', 'Task: ' + field.getValue()); 
             }
-        })
+        });
     },
     
     createCheckboxGroup: function(nameOfId) {
@@ -183,21 +194,60 @@ Ext.define('Focus.controller.Projects', {
 
     // TODO add a listener to each box
     createCheckbox: function(taskName, count) {
+        var me = this;
         //var group = Ext.getCmp('conditions');
         // TODO the 'id' must be more unique; add projectName or tabName or tabNumber
         // TODO its possible 'name' may also need to be more unique
+
+        // this rendered 'Object object'
+        // var label = new Ext.form.Label({
+        //     //itemId: 'box' + count,
+        //     //text: 'http://your-link-here.com',
+        //     autoEl: {
+        //         tag: 'a',
+        //         href: '#',
+        //         html: taskName
+        //     },
+        // });
+
         var checkbox = new Ext.form.field.Checkbox({
-            boxLabel: taskName,
+            // couldn't get tpl to work, but this may work
+            boxLabel: '<a href="#" class="taskName">' + taskName + '</a>',
+            boxLabelCls: 'boxLabelCls',
+            beforeBodyEl: 'beforeBodyEl',
+            bodyEl: 'FOOBAR',
+            value: taskName,
             name: 'task',
-            id: 'box' + count,
+            //itemId: me.createLegalIdNameFromString(taskName) + '_box_' + count,
+            itemId: 'box' + count,
             inputValue: '1', // TODO
             checked: false,
+            // autoEl:{
+            //     //html: '&nbsp;<a href>Link To Prospect</a>'
+            //     tag: 'a',
+            //     href: '#',
+            //     cn: taskName
+            // },
             // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
             listeners: {
                 change: function(checkbox, newValue, oldValue, eOpts) {
                     console.log('CHECKBOX CHANGED');
                     console.log(this.boxLabel);  // this works
-                }
+                },
+                render: function(component) {
+                    component.getEl().on('click', function(e) {
+                        //VP.util.Utils.dumpObject(component.getEl().down('.boxLabelCls').dom.innerText);
+                        //console.log(component.getEl().down('.boxLabelCls').dom.innerText);
+                        var taskText = component.getEl().down('.boxLabelCls').dom.innerText;
+                        Ext.Msg.alert('Now Working On', taskText); 
+                        //alert('test');
+                    });    
+                },
+                // click: function(component) {
+                //     component.getEl().on('click', function(e) {
+                //         alert('got click');
+                //     });    
+                // }
             }            
         });
         return checkbox;
