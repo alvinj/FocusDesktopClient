@@ -65,8 +65,27 @@ Ext.define('Focus.controller.Projects', {
 
     handleTabChange: function(tabName, panel) {
         var me = this;  // need this to access `this` inside `each` loop below
+        // if (!Ext.getStore('Tasks')) {
+        //     Ext.create('Focus.store.Tasks');
+        // }
         var tasksStore = me.getTasksStore();
-        tasksStore.load();
+        tasksStore.getProxy().extraParams.projectId = 1;
+        tasksStore.load({
+            callback: function(records, operation, success) {
+                console.log('tasksStore.load called');
+                console.log('    success: ' + success);
+                console.log('    records: ' + records);
+                for (var i = 0; i < records.length; i++) {
+                    //VP.util.Utils.dumpObject(records[i]);
+                    //console.log(records[i]);
+                }
+                // records.each(function(record) {
+                //     //console.log('    record: ' + record);
+                //     //VP.util.Utils.dumpObject(record);
+                // });
+            },
+            scope: this,
+        });
         // var content = '<ul>';
         // // TODO render those tasks as a list of checkboxes onto the panel
         // tasksStore.each(function(record) {
@@ -80,11 +99,11 @@ Ext.define('Focus.controller.Projects', {
 
         // TEXTFIELD
         // TODO don't add textfield if it already exists
-        var txt = me.createTextField();
-        me.addTextfieldListener(txt);
-        panel.add(txt);
+        var textField = me.createTextField();
+        me.addTextfieldListener(textField);
+        panel.add(textField);
 
-        // CHECKBOXES
+        // MAKE THE CHECKBOXES
         var groupItemId = me.makeGroupItemIdName(tabName);
         var group = me.createCheckboxGroup(groupItemId);
         //panel.body.update(group);
@@ -92,8 +111,11 @@ Ext.define('Focus.controller.Projects', {
         // TODO i don't know how to reference a method in this class/object
         // inside a block like this; a 'this' reference does not work by itself;
         // if i remember right, i need to pass something else to the function.
+        console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
+        console.log('TASK STORE COUNT: ' + tasksStore.count());
         tasksStore.each(function(record) {
             var task = record.data.description;
+            console.log('TASK: ' + task)
             var checkbox = me.createCheckbox(task, count++);
             me.addCheckboxToGroup(group, checkbox);
         });

@@ -8,8 +8,9 @@ Ext.define('Focus.store.Projects', {
         type: 'ajax',
         url: '/server/projects',
         method: 'GET',
+        noCache: false,
         reader: {
-            type: 'json',
+            type: 'json'
             //root: 'results'
         }
     },

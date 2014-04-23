@@ -1,12 +1,16 @@
 Ext.define('Focus.model.Task', {
     extend: 'Ext.data.Model',
     idProperty: 'id',
+
+    // {"id":1,"userId":1,"projectId":1,"parentId":0,"description":"Foo bar","status":"c","dateCreated":"2014-04-13"}
     fields: [
-        { name: 'id' },
-        { name: 'projectId' },
-        { name: 'description' },
-        { name: 'dateCreated' }, //TODO or sort order
-        { name: 'status' }       // 'c' = created, 'f' = finished
+        { name: 'id',          type: 'int' },
+        // { name: 'userId',      type: 'int' },
+        { name: 'projectId',   type: 'int' },
+        // { name: 'parentId',    type: 'int' },
+        { name: 'description', type: 'string' },
+        { name: 'status',      type: 'string' },      // 'c' = created, 'f' = finished
+        { name: 'dateCreated', type: 'string' }  //TODO or sort order
     ]
 
     // // should the Model or Store have the proxy?
