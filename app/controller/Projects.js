@@ -210,24 +210,16 @@ Ext.define('Focus.controller.Projects', {
         //     },
         // });
 
+        var checkboxFieldClass = 'checkboxFieldClass';
         var checkbox = new Ext.form.field.Checkbox({
-            // couldn't get tpl to work, but this may work
             boxLabel: '<a href="#" class="taskName">' + taskName + '</a>',
-            boxLabelCls: 'boxLabelCls',
-            beforeBodyEl: 'beforeBodyEl',
-            bodyEl: 'FOOBAR',
+            boxLabelCls: checkboxFieldClass,
             value: taskName,
             name: 'task',
             //itemId: me.createLegalIdNameFromString(taskName) + '_box_' + count,
             itemId: 'box' + count,
             inputValue: '1', // TODO
             checked: false,
-            // autoEl:{
-            //     //html: '&nbsp;<a href>Link To Prospect</a>'
-            //     tag: 'a',
-            //     href: '#',
-            //     cn: taskName
-            // },
             // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
             listeners: {
                 change: function(checkbox, newValue, oldValue, eOpts) {
@@ -235,19 +227,14 @@ Ext.define('Focus.controller.Projects', {
                     console.log(this.boxLabel);  // this works
                 },
                 render: function(component) {
-                    component.getEl().on('click', function(e) {
+                    component.getEl().on('click', function(event) {
                         //VP.util.Utils.dumpObject(component.getEl().down('.boxLabelCls').dom.innerText);
                         //console.log(component.getEl().down('.boxLabelCls').dom.innerText);
-                        var taskText = component.getEl().down('.boxLabelCls').dom.innerText;
+                        event.stopEvent();
+                        var taskText = component.getEl().down('.'+checkboxFieldClass).dom.innerText;
                         Ext.Msg.alert('Now Working On', taskText); 
-                        //alert('test');
                     });    
-                },
-                // click: function(component) {
-                //     component.getEl().on('click', function(e) {
-                //         alert('got click');
-                //     });    
-                // }
+                }
             }            
         });
         return checkbox;

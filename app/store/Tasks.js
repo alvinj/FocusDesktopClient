@@ -5,7 +5,7 @@ Ext.define('Focus.store.Tasks', {
 
     proxy: {
         type: 'ajax',
-        url: 'data/tasks.json',
+        url: '/server/tasks',
         reader: {
             type: 'json',
             root: 'tasks'

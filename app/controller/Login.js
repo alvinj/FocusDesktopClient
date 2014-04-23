@@ -48,7 +48,7 @@ Ext.define('Focus.controller.Login', {
                 //
                 // TODO put your login url here
                 //
-                url: 'php/login.php',
+                url: '/server/login',
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 jsonData: {

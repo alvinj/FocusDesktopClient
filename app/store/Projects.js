@@ -6,10 +6,11 @@ Ext.define('Focus.store.Projects', {
     // TODO duplicated from the model atm
     proxy: {
         type: 'ajax',
-        url: 'data/projects.json',
+        url: '/server/projects',
+        method: 'GET',
         reader: {
             type: 'json',
-            root: 'results'
+            //root: 'results'
         }
     },
     // autoLoad: true,
