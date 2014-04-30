@@ -63,29 +63,52 @@ Ext.define('Focus.controller.Projects', {
         this.handleTabChange(panel.title, panel);
     },
 
+    // store loading urls:
+    // http://www.curiousm.com/labs/2012/11/13/sencha-touch-2-dynamically-loading-the-store-of-a-list-and-asking-the-server-for-data-by-parameter/
     handleTabChange: function(tabName, panel) {
+        console.log('ENTERED handleTabChange');
         var me = this;  // need this to access `this` inside `each` loop below
-        // if (!Ext.getStore('Tasks')) {
-        //     Ext.create('Focus.store.Tasks');
-        // }
-        var tasksStore = me.getTasksStore();
+
+        if (!Ext.getStore('Tasks')) {
+            console.log('handleTabChange: Tasks store did not exist');
+            Ext.create('Tasks');
+        }
+
+        // STORE: http://docs.sencha.com/extjs/4.2.2/#!/api/Ext.data.Store
+        //Ext.getStore('Tasks').load();
+        var tasksStore = this.getTasksStore();
+        //var tasksStore = Ext.getStore('Tasks');
+
         tasksStore.getProxy().extraParams.projectId = 1;
-        tasksStore.load({
-            callback: function(records, operation, success) {
-                console.log('tasksStore.load called');
-                console.log('    success: ' + success);
-                console.log('    records: ' + records);
-                for (var i = 0; i < records.length; i++) {
-                    //VP.util.Utils.dumpObject(records[i]);
-                    //console.log(records[i]);
-                }
-                // records.each(function(record) {
-                //     //console.log('    record: ' + record);
-                //     //VP.util.Utils.dumpObject(record);
-                // });
-            },
-            scope: this,
-        });
+        tasksStore.load();
+        console.log('COUNT = ' + tasksStore.count());
+
+        // tasksStore.load({
+        //     callback: function(records, operation, success) {
+        //         // do something after the load finishes
+        //     },
+        //     scope: this
+        // });
+
+        // tasksStore.load({
+        //     callback: function(records, operation, success) {
+        //         console.log('tasksStore.load called');
+        //         console.log('    success:   ' + success);
+        //         console.log('    operation: ' + operation);
+        //         console.log('    records:   ' + records);
+        //         for (var i = 0; i < records.length; i++) {
+        //             console.log('RECORD:');
+        //             //VP.util.Utils.dumpObject(records[i].data);
+        //             //console.log(records[i]);
+        //         }
+        //         // records.each(function(record) {
+        //         //     //console.log('    record: ' + record);
+        //         //     //VP.util.Utils.dumpObject(record);
+        //         // });
+        //     }
+        //     // scope: this,
+        // });
+
         // var content = '<ul>';
         // // TODO render those tasks as a list of checkboxes onto the panel
         // tasksStore.each(function(record) {
