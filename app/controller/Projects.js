@@ -51,9 +51,21 @@ Ext.define('Focus.controller.Projects', {
 
     onTaskListPanelActivate: function(panel, options) {
         console.log("ENTERED onTaskListPanelActivate");
+        VP.util.Utils.dumpObject(panel);
+        if ('null' == panel) {
+            console.log('  PANEL WAS NULL');            
+        }
+        //var textfield = panel.down('#taskTextfield');
+        var textfield = panel.down('textfield');
+        console.log('  GOT THE TEXTFIELD');
+        console.log(textfield);
+        if ('null' == textfield) {
+            console.log('  TEXTFIELD WAS NULL');            
+        }
+        // textfield.focus(false, 200);
     },
 
-    onTaskListPanelAfterRender: function() {
+    onTaskListPanelAfterRender: function(panel, options) {
         console.log("ENTERED onTaskListPanelAfterRender");
     },
 
@@ -105,6 +117,11 @@ Ext.define('Focus.controller.Projects', {
         this.handleTabChange(panel.title, panel);
     },
 
+    addTextfieldToPanel: function(textField, panel) {
+        this.addTextfieldListener(textField);
+        panel.add(textField);
+    },
+
     // store loading urls:
     // http://www.curiousm.com/labs/2012/11/13/sencha-touch-2-dynamically-loading-the-store-of-a-list-and-asking-the-server-for-data-by-parameter/
     handleTabChange: function(tabName, panel) {
@@ -125,7 +142,42 @@ Ext.define('Focus.controller.Projects', {
         // these add the params as cgi parameters to the GET url
         tasksStore.getProxy().extraParams.projectId = me.getProjectId(tabName);
         //tasksStore.getProxy().extraParams.projectName = tabName;
-        tasksStore.load();
+
+        // it's important to do these actions inside the load() method,
+        // because the load process can fail, and you need to handle that failure
+        tasksStore.load({
+            callback: function(records, operation, success) {
+                console.log('tasksStore.load called');
+                console.log('    success:   ' + success);
+
+                panel.removeAll();
+                me.addTextfieldToPanel(me.createTextField(), panel);
+
+                if (success == true) {
+                    // MAKE THE CHECKBOXES
+                    var groupItemId = me.makeGroupItemIdName(tabName);
+                    var group = me.createCheckboxGroup(groupItemId);
+                    //panel.body.update(group);
+                    var count = 1;
+                    // TODO i don't know how to reference a method in this class/object
+                    // inside a block like this; a 'this' reference does not work by itself;
+                    // if i remember right, i need to pass something else to the function.
+                    console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
+                    console.log('TASK STORE COUNT: ' + tasksStore.count());
+                    tasksStore.each(function(record) {
+                        var task = record.data.description;
+                        console.log('TASK: ' + task)
+                        var checkbox = me.createCheckbox(task, count++);
+                        me.addCheckboxToGroup(group, checkbox);
+                    });
+                    panel.add(group);
+                    panel.doLayout();
+                } else {
+                    // the store didn't load, anything to do?
+                }
+            }
+            // scope: this,
+        });
         console.log('COUNT = ' + tasksStore.count());
 
         // tasksStore.load({
@@ -165,30 +217,33 @@ Ext.define('Focus.controller.Projects', {
         // panel.body.update(content);
         // panel.doLayout();
 
-        // TEXTFIELD
-        // TODO don't add textfield if it already exists
-        var textField = me.createTextField();
-        me.addTextfieldListener(textField);
-        panel.add(textField);
 
-        // MAKE THE CHECKBOXES
-        var groupItemId = me.makeGroupItemIdName(tabName);
-        var group = me.createCheckboxGroup(groupItemId);
-        //panel.body.update(group);
-        var count = 1;
-        // TODO i don't know how to reference a method in this class/object
-        // inside a block like this; a 'this' reference does not work by itself;
-        // if i remember right, i need to pass something else to the function.
-        console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
-        console.log('TASK STORE COUNT: ' + tasksStore.count());
-        tasksStore.each(function(record) {
-            var task = record.data.description;
-            console.log('TASK: ' + task)
-            var checkbox = me.createCheckbox(task, count++);
-            me.addCheckboxToGroup(group, checkbox);
-        });
-        panel.add(group);
-        panel.doLayout();
+        // panel.removeAll();
+
+        // // TEXTFIELD
+        // // TODO don't add textfield if it already exists
+        // var textField = me.createTextField();
+        // me.addTextfieldListener(textField);
+        // panel.add(textField);
+
+        // // MAKE THE CHECKBOXES
+        // var groupItemId = me.makeGroupItemIdName(tabName);
+        // var group = me.createCheckboxGroup(groupItemId);
+        // //panel.body.update(group);
+        // var count = 1;
+        // // TODO i don't know how to reference a method in this class/object
+        // // inside a block like this; a 'this' reference does not work by itself;
+        // // if i remember right, i need to pass something else to the function.
+        // console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
+        // console.log('TASK STORE COUNT: ' + tasksStore.count());
+        // tasksStore.each(function(record) {
+        //     var task = record.data.description;
+        //     console.log('TASK: ' + task)
+        //     var checkbox = me.createCheckbox(task, count++);
+        //     me.addCheckboxToGroup(group, checkbox);
+        // });
+        // panel.add(group);
+        // panel.doLayout();
     },
 
     // get the projectId from the projectName
@@ -214,10 +269,12 @@ Ext.define('Focus.controller.Projects', {
         return Ext.create('Ext.form.field.Text', {
             fieldLabel: 'Task:',
             name: 'taskfield',
+            itemId: 'taskTextfield',
             enableKeyEvents: true
         });
     },
 
+    // TODO implement the 'add task' process
     addTextfieldListener: function(textfield) {
         textfield.on('keyup', function(field, event, options) {
             if (event.getCharCode() === event.ENTER) {
@@ -229,6 +286,7 @@ Ext.define('Focus.controller.Projects', {
     createCheckboxGroup: function(nameOfId) {
         var grp = new Ext.form.CheckboxGroup({
             //fieldLabel: 'CheckboxGroup',
+            //hideLabel: true,
             columns: 1,
             id: nameOfId,
             itemId: nameOfId,
@@ -253,11 +311,7 @@ Ext.define('Focus.controller.Projects', {
                         console.log(field);
                     }
                 },
-                // // NOT WORKING
-                // change: function(foo) {
-                //     console.log('CHANGE!');
-                // },
-                // this works
+                // works
                 afterrender: function(foo) {
                     console.log('afterrender');
                 },
@@ -281,10 +335,6 @@ Ext.define('Focus.controller.Projects', {
                     }
                 }
              }
-            // items: [
-            //     {boxLabel: 'Do foo', name: 'task', inputValue: '1', id: 'box1', checked: true},
-            //     {boxLabel: 'Do bar-baz', name: 'task', inputValue: '1', id: 'box1', checked: false}
-            // ]
         });
         return grp;
     },
@@ -292,9 +342,6 @@ Ext.define('Focus.controller.Projects', {
     // TODO add a listener to each box
     createCheckbox: function(taskName, count) {
         var me = this;
-        //var group = Ext.getCmp('conditions');
-        // TODO the 'id' must be more unique; add projectName or tabName or tabNumber
-        // TODO its possible 'name' may also need to be more unique
 
         // this rendered 'Object object'
         // var label = new Ext.form.Label({
@@ -309,7 +356,7 @@ Ext.define('Focus.controller.Projects', {
 
         var checkboxFieldClass = 'checkboxFieldClass';
         var checkbox = new Ext.form.field.Checkbox({
-            boxLabel: '<a href="#" class="taskName">' + taskName + '</a>',
+            boxLabel: ' <a href="#" class="taskName">' + taskName + '</a>',
             boxLabelCls: checkboxFieldClass,
             value: taskName,
             name: 'task',
@@ -375,7 +422,6 @@ Ext.define('Focus.controller.Projects', {
                 xtype: 'taskListPanel',
                 closable: false,
                 title: record.data.name, // the text on the tab
-                html: '<h1>' + record.data.name + '</h1>',
                 alias: 'widget.' + record.data.name.toLowerCase(),
                 iconCls: record.data.name.toLowerCase(),  // renders 'class="finance"'
                 listeners : {
@@ -391,7 +437,7 @@ Ext.define('Focus.controller.Projects', {
             });
         });
         mainTabPanel.setActiveTab(0);
-        // TODO i think i need to create these tabs as an array so i can
+        // TODO i may need to create these tabs as an array so i can
         // access them, and also know which one is in the foreground
     },
 
