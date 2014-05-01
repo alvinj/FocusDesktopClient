@@ -35,8 +35,50 @@ Ext.define('Focus.controller.Projects', {
             "mainTabPanel": {
                 render: this.onMainTabPanelRender,
                 tabchange: this.onMainTabPanelTabChange,
+            },
+            "taskListPanel": {
+                activate: this.onTaskListPanelActivate,
+                afterrender: this.onTaskListPanelAfterRender,
+                beforerender: this.onTaskListPanelBeforeRender,
+                beforestaterestore: this.onTaskListPanelBeforeStateRestore,
+                enable: this.onTaskListPanelEnable,
+                render: this.onTaskListPanelRender,
+                show: this.onTaskListPanelShow,
+                staterestore: this.onTaskListPanelStateRestore,
             }
         });
+    },
+
+    onTaskListPanelActivate: function(panel, options) {
+        console.log("ENTERED onTaskListPanelActivate");
+    },
+
+    onTaskListPanelAfterRender: function() {
+        console.log("ENTERED onTaskListPanelAfterRender");
+    },
+
+    onTaskListPanelBeforeRender: function() {
+        console.log("ENTERED onTaskListPanelBeforeRender");
+    },
+
+    onTaskListPanelBeforeStateRestore: function() {
+        console.log("ENTERED onTaskListPanelBeforeStateRestore");
+    },
+
+    onTaskListPanelEnable: function() {
+        console.log("ENTERED onTaskListPanelEnable");
+    },
+
+    onTaskListPanelRender: function() {
+        console.log("ENTERED onTaskListPanelRender");
+    },
+
+    onTaskListPanelShow: function() {
+        console.log("ENTERED onTaskListPanelShow");
+    },
+
+    onTaskListPanelStateRestore: function() {
+        console.log("ENTERED onTaskListPanelStateRestore");
     },
 
     onLaunch: function() {
@@ -79,7 +121,10 @@ Ext.define('Focus.controller.Projects', {
         var tasksStore = this.getTasksStore();
         //var tasksStore = Ext.getStore('Tasks');
 
-        tasksStore.getProxy().extraParams.projectId = 1;
+        // TODO probably want a urlencoded tabname here
+        // these add the params as cgi parameters to the GET url
+        tasksStore.getProxy().extraParams.projectId = me.getProjectId(tabName);
+        //tasksStore.getProxy().extraParams.projectName = tabName;
         tasksStore.load();
         console.log('COUNT = ' + tasksStore.count());
 
@@ -144,6 +189,13 @@ Ext.define('Focus.controller.Projects', {
         });
         panel.add(group);
         panel.doLayout();
+    },
+
+    // get the projectId from the projectName
+    getProjectId: function(projectName) {
+        var projectsStore = this.getProjectsStore();
+        var project = projectsStore.findRecord('name', projectName);
+        return project.get('id');
     },
 
     // each checkbox group must have a different itemId. make the itemId from the
@@ -321,7 +373,7 @@ Ext.define('Focus.controller.Projects', {
             //tabsArray.push(record.data.name);
             var tab = mainTabPanel.add({
                 xtype: 'taskListPanel',
-                closable: true,
+                closable: false,
                 title: record.data.name, // the text on the tab
                 html: '<h1>' + record.data.name + '</h1>',
                 alias: 'widget.' + record.data.name.toLowerCase(),

@@ -3,14 +3,15 @@ Ext.define('Focus.model.Task', {
 
     idProperty: 'id',
 
+    // "id":1,"userId":1,"projectId":1,"parentId":0,"description":"Get tabs working","status":"c","dateCreated":"2014-04-13"}
     // {"id":1,"userId":1,"projectId":1,"parentId":0,"description":"Foo bar","status":"c","dateCreated":"2014-04-13"}
     fields: [
         { name: 'id',          type: 'int' },
-        // { name: 'userId',      type: 'int' },
+        { name: 'userId',      type: 'int' },
         { name: 'projectId',   type: 'int' },
-        // { name: 'parentId',    type: 'int' },
+        { name: 'parentId',    type: 'int' },
         { name: 'description', type: 'string' },
-        { name: 'status',      type: 'string' },      // 'c' = created, 'f' = finished
+        { name: 'status',      type: 'string' }, // 'c' = created, 'f' = finished
         { name: 'dateCreated', type: 'string' }  //TODO or sort order
     ]
 

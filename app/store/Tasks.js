@@ -7,18 +7,16 @@ Ext.define('Focus.store.Tasks', {
         'VP.util.Utils'
     ],
 
-    // fields: ['id', 'projectId', 'description', 'status', 'dateCreated'],
-
     proxy: {
         type: 'ajax',
-        // url: '/server/tasks',
-        url: 'data/tasks.json',
+        url: '/server/tasks',
+        //url: 'data/tasks.json',
 
         // some vars to help control the url
-        // noCache: false,
-        // limitParam: false,
-        // enablePagingParams: false,
-        // startParam: false,
+        noCache: false,
+        limitParam: false,
+        enablePagingParams: false,
+        startParam: false,
 
         // TODO I REALLY WANT 'POST' HERE
         // because i want 'read' to be a POST
