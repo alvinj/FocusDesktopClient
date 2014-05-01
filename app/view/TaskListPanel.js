@@ -3,7 +3,8 @@
  * a given project.
  */
 Ext.define('Focus.view.TaskListPanel', {
-    extend: 'Ext.panel.Panel',
+    // extend: 'Ext.panel.Panel',
+    extend: 'Ext.form.FormPanel',
     alias: 'widget.taskListPanel',
 
     // requires: [

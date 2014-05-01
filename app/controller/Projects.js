@@ -50,19 +50,22 @@ Ext.define('Focus.controller.Projects', {
     },
 
     onTaskListPanelActivate: function(panel, options) {
-        console.log("ENTERED onTaskListPanelActivate");
-        VP.util.Utils.dumpObject(panel);
-        if ('null' == panel) {
-            console.log('  PANEL WAS NULL');            
-        }
-        //var textfield = panel.down('#taskTextfield');
-        var textfield = panel.down('textfield');
-        console.log('  GOT THE TEXTFIELD');
-        console.log(textfield);
-        if ('null' == textfield) {
-            console.log('  TEXTFIELD WAS NULL');            
-        }
-        // textfield.focus(false, 200);
+        // console.log("ENTERED onTaskListPanelActivate");
+        // // VP.util.Utils.dumpObject(panel);
+        // if ('null' == panel) {
+        //     console.log('  PANEL WAS NULL');            
+        // }
+        // //var textfield = panel.down('#taskTextfield');
+        // //var textfield = panel.down('textfield[itemId=taskTextfield]');
+        // //var textfield = Ext.getCmp('textfield[name=taskTextfield]');
+        // //var textfield = panel.getComponent('taskTextfield');
+        // var textfield = Ext.ComponentQuery.query('#taskTextfield').el;
+        // console.log('  AFTER GETTING THE TEXTFIELD');
+        // console.log(textfield);
+        // if (null === textfield) {
+        //     console.log('  TEXTFIELD WAS NULL');            
+        // }
+        // //textfield.focus(false, 200);
     },
 
     onTaskListPanelAfterRender: function(panel, options) {
@@ -166,7 +169,7 @@ Ext.define('Focus.controller.Projects', {
                     console.log('TASK STORE COUNT: ' + tasksStore.count());
                     tasksStore.each(function(record) {
                         var task = record.data.description;
-                        console.log('TASK: ' + task)
+                        console.log('TASK: ' + task);
                         var checkbox = me.createCheckbox(task, count++);
                         me.addCheckboxToGroup(group, checkbox);
                     });
@@ -270,7 +273,14 @@ Ext.define('Focus.controller.Projects', {
             fieldLabel: 'Task:',
             name: 'taskfield',
             itemId: 'taskTextfield',
-            enableKeyEvents: true
+            autofocus: true,
+            enableKeyEvents: true,
+            listeners: {
+                // this works, putting focus in the textfield
+                afterrender: function(field) {
+                    field.focus();
+                }
+            }
         });
     },
 
