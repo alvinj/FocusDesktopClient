@@ -278,7 +278,7 @@ Ext.define('Focus.controller.Projects', {
             listeners: {
                 // this works, putting focus in the textfield
                 afterrender: function(field) {
-                    field.focus();
+                    field.focus(false, 250);
                 }
             }
         });

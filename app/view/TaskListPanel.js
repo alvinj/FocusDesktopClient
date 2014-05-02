@@ -7,6 +7,8 @@ Ext.define('Focus.view.TaskListPanel', {
     extend: 'Ext.form.FormPanel',
     alias: 'widget.taskListPanel',
 
+    //renderTo: Ext.getBody(),  // TODO this creates two horizontal lines in the panel (which is bad)
+    style: 'margin: 50px;',   // NOTE can also use bodyStyle
     // requires: [
     //     'Ext.ux.IFrame'
     // ],
