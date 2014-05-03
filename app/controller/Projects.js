@@ -200,7 +200,7 @@ Ext.define('Focus.controller.Projects', {
     createLegalIdNameFromString: function(s) {
         var x = VP.util.Utils.capitalizeEachWord(s);
         var y = VP.util.Utils.stripNonWordCharacters(x);
-        return VP.util.Utils.removeSpaces();
+        return VP.util.Utils.removeSpaces(y);
     },
 
     createHiddenProjectIdField: function(projectName) {
@@ -226,6 +226,10 @@ Ext.define('Focus.controller.Projects', {
             itemId: 'taskTextfield',
             autofocus: true,
             enableKeyEvents: true,
+            labelAlign: 'left',
+            labelWidth: 50,
+            labelStyle: 'font-size: 16px;',
+            width: 500,
             listeners: {
                 // this works, putting focus in the textfield
                 afterrender: function(field) {
@@ -263,10 +267,16 @@ Ext.define('Focus.controller.Projects', {
                             var result = Packt.util.Util.decodeJSON(conn.responseText);
                             if (result.success) {
                                 Packt.util.Alert.msg('Success!', 'Task was saved.');
-                                textfield.setValue();
                                 // TODO do whatever is needed to add the checkbox to the list of checkboxes
                                 // TODO should also sync up the store
                                 // tasksStore.load();
+                                var description = textfield.getValue();
+                                var checkbox = me.createCheckbox(description, me.createLegalIdNameFromString(description));
+                                // get the checkboxgroup and add the checkbox
+                                var group = formPanel.down('checkboxgroup');
+                                me.insertCheckboxIntoGroup(group, checkbox);
+                                textfield.setValue(); //clear
+                                formPanel.doLayout();
                             } else {
                                 Packt.util.Util.showErrorMsg(result.msg);
                             }
@@ -338,28 +348,16 @@ Ext.define('Focus.controller.Projects', {
     },
 
     // TODO add a listener to each box
-    createCheckbox: function(taskName, count) {
+    createCheckbox: function(taskName, uniqueIdentifier) {
         var me = this;
-
-        // this rendered 'Object object'
-        // var label = new Ext.form.Label({
-        //     //itemId: 'box' + count,
-        //     //text: 'http://your-link-here.com',
-        //     autoEl: {
-        //         tag: 'a',
-        //         href: '#',
-        //         html: taskName
-        //     },
-        // });
-
         var checkboxFieldClass = 'checkboxFieldClass';
         var checkbox = new Ext.form.field.Checkbox({
             boxLabel: ' <a href="#" class="taskName">' + taskName + '</a>',
             boxLabelCls: checkboxFieldClass,
             value: taskName,
             name: 'task',
-            //itemId: me.createLegalIdNameFromString(taskName) + '_box_' + count,
-            itemId: 'box' + count,
+            //itemId: me.createLegalIdNameFromString(taskName) + '_box_' + uniqueIdentifier,
+            itemId: 'box' + uniqueIdentifier,
             inputValue: '1', // TODO
             checked: false,
             // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
@@ -380,6 +378,10 @@ Ext.define('Focus.controller.Projects', {
             }
         });
         return checkbox;
+    },
+
+    insertCheckboxIntoGroup: function(group, checkbox) {
+        group.items.insert(0, checkbox);
     },
 
     addCheckboxToGroup: function(group, checkbox) {
