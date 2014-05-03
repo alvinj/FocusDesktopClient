@@ -22,8 +22,8 @@ Ext.define('Focus.controller.Projects', {
         }
     ],
 
+    // note: this is called before the user logs in (currently)
     init: function(application) {
-        console.log("Project::init called");
         this.control({
             // lookup the 'My Stocks' button on the menu and add a click handler.
             // the name 'basic-panels' is the xtype declared in view.menu.Menu.
@@ -34,6 +34,7 @@ Ext.define('Focus.controller.Projects', {
             // by the Login controller.
             "mainTabPanel": {
                 render: this.onMainTabPanelRender,
+                afterrender: this.onMainTabPanelAfterRender,
                 tabchange: this.onMainTabPanelTabChange,
             },
             "taskListPanel": {
@@ -97,18 +98,9 @@ Ext.define('Focus.controller.Projects', {
     },
 
     onLaunch: function() {
+        console.log('ENTERED onLaunch');
         // i don't know why, but this needs to be here for the store
         // to *really* be loaded
-        var projectsStore = this.getProjectsStore();
-        projectsStore.load();
-        // if (!Ext.getStore('Tasks')) {
-        //     Ext.create('Focus.store.Tasks');
-        // }
-        // console.log('BEFORE getTasksStore');
-        // var tasksStore = this.getTasksStore();
-        // console.log('BEFORE tasksStore.load');
-        // tasksStore.load();
-        // console.log('AFTER tasksStore.load');
     },
 
     // info on tab panel listeners:
@@ -389,7 +381,7 @@ Ext.define('Focus.controller.Projects', {
                         Ext.Msg.alert('Now Working On', taskText); 
                     });    
                 }
-            }            
+            }
         });
         return checkbox;
     },
@@ -419,37 +411,54 @@ Ext.define('Focus.controller.Projects', {
      * from 'mastering', p. 109
      */
     onMainTabPanelRender: function(component, options) {
-        // 1) get the store
-        var projectsStore = this.getProjectsStore();
-        // projectsStore.load();
-        // 2) create a tab for each project
+        console.log('ENTERED onMainTabPanelRender, trying to get ProjectsStore');
         var mainTabPanel = this.getMainTabPanel();
         //var tabsArray = new Array();
-        projectsStore.each(function(record) {
-            console.log(record.data.name);
-            //tabsArray.push(record.data.name);
-            var tab = mainTabPanel.add({
-                xtype: 'taskListPanel',
-                closable: false,
-                title: record.data.name, // the text on the tab
-                alias: 'widget.' + record.data.name.toLowerCase(),
-                iconCls: record.data.name.toLowerCase(),  // renders 'class="finance"'
-                listeners : {
-                    click: function () { 
-                        console.log("YOU CLICKED A TAB !!!");
-                    },
-                    // beforeclose : function(tab) {
-                    //     tab.removeAll();
-                    //     tab.destroy();
-                    //     return true;
-                    // }
+        var projectsStore = this.getProjectsStore();
+        projectsStore.load({
+            callback: function(records, operation, success) {
+                console.log('projectsStore.load called');
+                console.log('    success:      ' + success);
+                if (success == true) {
+                    projectsStore.each(function(record) {
+                        console.log('    creating tab: ' + record.data.name);
+                        //tabsArray.push(record.data.name);
+                        var tab = mainTabPanel.add({
+                            xtype: 'taskListPanel',
+                            closable: false,
+                            title: record.data.name, // the text on the tab
+                            alias: 'widget.' + record.data.name.toLowerCase(),
+                            iconCls: record.data.name.toLowerCase(),  // renders 'class="finance"'
+                            listeners : {
+                                click: function () { 
+                                    console.log("YOU CLICKED A TAB !!!");
+                                },
+                                // beforeclose : function(tab) {
+                                //     tab.removeAll();
+                                //     tab.destroy();
+                                //     return true;
+                                // }
+                            }
+                        });
+                        // tab.doLayout();
+                    });
+                    // mainTabPanel.doLayout();
+                } else {
+                    console.log('    success was false (bad)');
                 }
-            });
+            }
         });
+
         mainTabPanel.setActiveTab(0);
+        mainTabPanel.doLayout();
         // TODO i may need to create these tabs as an array so i can
         // access them, and also know which one is in the foreground
     },
+
+    onMainTabPanelAfterRender: function(tabPanel, options) {
+        console.log('ENTERED onMainTabPanelAfterRender');
+        tabPanel.setActiveTab(0);
+    }
 
 });
 

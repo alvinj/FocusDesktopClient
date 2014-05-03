@@ -16,6 +16,7 @@ Ext.define('Focus.store.Projects', {
     },
     // autoLoad: true,
 
+    // this is never called
     init: function(application) {
         console.log('Projects store created');
     }

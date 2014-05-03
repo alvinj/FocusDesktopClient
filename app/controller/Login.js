@@ -6,13 +6,18 @@ Ext.define('Focus.controller.Login', {
         'Packt.util.Alert',
         'Focus.view.MainViewport',
         'Packt.util.Util',
-        'Packt.util.SessionMonitor'
+        'Packt.util.SessionMonitor',
+        'Focus.controller.Projects'
     ],
 
     views: [
         'Login',
         'Header'
     ],
+
+    // controllers: [
+    //     'Header'
+    // ],
 
     init: function(application) {
         console.log("Login::init called");
@@ -36,6 +41,7 @@ Ext.define('Focus.controller.Login', {
     },
 
     onButtonClickSubmit: function(button, e, options) {
+        var me = this;
         var formPanel = button.up('form'),
             login = button.up('login'),
             user = formPanel.down('textfield[name=user]').getValue(),
@@ -45,9 +51,6 @@ Ext.define('Focus.controller.Login', {
             // pass = Packt.util.MD5.encode(pass);
             Ext.get(login.getEl()).mask("Authenticating... Please wait...", 'loading');
             Ext.Ajax.request({
-                //
-                // TODO put your login url here
-                //
                 url: '/server/login',
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -60,10 +63,9 @@ Ext.define('Focus.controller.Login', {
                     var result = Packt.util.Util.decodeJSON(conn.responseText);
                     if (result.success) {
                         login.close();
+                        // docs say i need to call controller.init(), but that's not true
+                        var projectsController = me.getController('Focus.controller.Projects');
                         Ext.create('Focus.view.MainViewport');
-                        //var mainController = this.getController('Main');
-                        //mainController.init();
-                        //Ext.create('Focus.controller.Main');
                         Packt.util.SessionMonitor.start();
                     } else {
                         // TODO get the 'msg' from the json and display it

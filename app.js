@@ -46,7 +46,7 @@ Ext.application({
     controllers: [
         'Main',
         'Login',
-        'Projects',
+        // 'Projects',
         'Tasks'
     ],
 

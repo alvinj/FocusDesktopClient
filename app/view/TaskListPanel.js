@@ -9,9 +9,6 @@ Ext.define('Focus.view.TaskListPanel', {
 
     //renderTo: Ext.getBody(),  // TODO this creates two horizontal lines in the panel (which is bad)
     style: 'margin: 50px;',   // NOTE can also use bodyStyle
-    // requires: [
-    //     'Ext.ux.IFrame'
-    // ],
 
     items: [
         {
