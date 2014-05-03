@@ -145,8 +145,16 @@ Ext.define('Focus.controller.Projects', {
                 console.log('tasksStore.load called');
                 console.log('    success:   ' + success);
 
+                // clear the panel
                 panel.removeAll();
+
+                // add the textfield
                 me.addTextfieldToPanel(me.createTextField(), panel);
+
+                // add hidden fields with the projectId and status.
+                // TODO can handle the status as a simple form param
+                panel.add(me.createHiddenProjectIdField(tabName));
+                panel.add(me.createHiddenStatusField());
 
                 if (success == true) {
                     // MAKE THE CHECKBOXES
@@ -174,71 +182,6 @@ Ext.define('Focus.controller.Projects', {
             // scope: this,
         });
         console.log('COUNT = ' + tasksStore.count());
-
-        // tasksStore.load({
-        //     callback: function(records, operation, success) {
-        //         // do something after the load finishes
-        //     },
-        //     scope: this
-        // });
-
-        // tasksStore.load({
-        //     callback: function(records, operation, success) {
-        //         console.log('tasksStore.load called');
-        //         console.log('    success:   ' + success);
-        //         console.log('    operation: ' + operation);
-        //         console.log('    records:   ' + records);
-        //         for (var i = 0; i < records.length; i++) {
-        //             console.log('RECORD:');
-        //             //VP.util.Utils.dumpObject(records[i].data);
-        //             //console.log(records[i]);
-        //         }
-        //         // records.each(function(record) {
-        //         //     //console.log('    record: ' + record);
-        //         //     //VP.util.Utils.dumpObject(record);
-        //         // });
-        //     }
-        //     // scope: this,
-        // });
-
-        // var content = '<ul>';
-        // // TODO render those tasks as a list of checkboxes onto the panel
-        // tasksStore.each(function(record) {
-        //     var task = record.data.description;
-        //     console.log('TASK: ' + task);
-        //     content += '<li>' + task + '</li>';
-        // });
-        // content += '</ul>';
-        // panel.body.update(content);
-        // panel.doLayout();
-
-
-        // panel.removeAll();
-
-        // // TEXTFIELD
-        // // TODO don't add textfield if it already exists
-        // var textField = me.createTextField();
-        // me.addTextfieldListener(textField);
-        // panel.add(textField);
-
-        // // MAKE THE CHECKBOXES
-        // var groupItemId = me.makeGroupItemIdName(tabName);
-        // var group = me.createCheckboxGroup(groupItemId);
-        // //panel.body.update(group);
-        // var count = 1;
-        // // TODO i don't know how to reference a method in this class/object
-        // // inside a block like this; a 'this' reference does not work by itself;
-        // // if i remember right, i need to pass something else to the function.
-        // console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
-        // console.log('TASK STORE COUNT: ' + tasksStore.count());
-        // tasksStore.each(function(record) {
-        //     var task = record.data.description;
-        //     console.log('TASK: ' + task)
-        //     var checkbox = me.createCheckbox(task, count++);
-        //     me.addCheckboxToGroup(group, checkbox);
-        // });
-        // panel.add(group);
-        // panel.doLayout();
     },
 
     // get the projectId from the projectName
@@ -260,10 +203,26 @@ Ext.define('Focus.controller.Projects', {
         return VP.util.Utils.removeSpaces();
     },
 
+    createHiddenProjectIdField: function(projectName) {
+        return Ext.form.Field({
+            xtype: 'hiddenfield',
+            name: 'projectId',
+            value: this.getProjectId(projectName)
+        });
+    },
+
+    createHiddenStatusField: function() {
+        return Ext.form.Field({
+            xtype: 'hiddenfield',
+            name: 'status',
+            value: 'c'
+        });
+    },
+
     createTextField: function() {
         return Ext.create('Ext.form.field.Text', {
             fieldLabel: 'Task:',
-            name: 'taskfield',
+            name: 'task',
             itemId: 'taskTextfield',
             autofocus: true,
             enableKeyEvents: true,
@@ -271,16 +230,53 @@ Ext.define('Focus.controller.Projects', {
                 // this works, putting focus in the textfield
                 afterrender: function(field) {
                     field.focus(false, 250);
+                },
+                // ADDOption1
+                specialkey: function(field, event, options) {
+                    console.log('ENTERED specialkey');
+                    if (event.getKey() == event.ENTER) {
+                        console.log('    got ENTER key');
+                        console.log('    field value: ' + field.getValue());
+                        // var saveBtn = field.up('researchLinkForm').down('button#save');
+                        // saveBtn.fireEvent('click', saveBtn, event, options);
+                    }                    
                 }
             }
         });
     },
 
-    // TODO implement the 'add task' process
+    // ADDOption2
     addTextfieldListener: function(textfield) {
+        var me = this;
         textfield.on('keyup', function(field, event, options) {
             if (event.getCharCode() === event.ENTER) {
-               Ext.Msg.alert('Alert', 'Task: ' + field.getValue()); 
+                var formPanel = textfield.up('form');
+                var tasksStore = me.getTasksStore();
+                // if the form is valid, send the data
+                if (formPanel.getForm().isValid()) {
+                    Ext.Ajax.request({
+                        url: 'server/tasks/add',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        params : Ext.JSON.encode(formPanel.getValues()),
+                        success: function(conn, response, options, eOpts) {
+                            var result = Packt.util.Util.decodeJSON(conn.responseText);
+                            if (result.success) {
+                                Packt.util.Alert.msg('Success!', 'Task was saved.');
+                                textfield.setValue();
+                                // TODO do whatever is needed to add the checkbox to the list of checkboxes
+                                // TODO should also sync up the store
+                                // tasksStore.load();
+                            } else {
+                                Packt.util.Util.showErrorMsg(result.msg);
+                            }
+                        },
+                        failure: function(conn, response, options, eOpts) {
+                            // TODO get the 'msg' from the json and display it
+                            Packt.util.Util.showErrorMsg(conn.responseText);
+                        }
+                    });
+                }
             }
         });
     },
@@ -421,7 +417,6 @@ Ext.define('Focus.controller.Projects', {
                 console.log('    success:      ' + success);
                 if (success == true) {
                     projectsStore.each(function(record) {
-                        console.log('    creating tab: ' + record.data.name);
                         //tabsArray.push(record.data.name);
                         var tab = mainTabPanel.add({
                             xtype: 'taskListPanel',
@@ -440,9 +435,7 @@ Ext.define('Focus.controller.Projects', {
                                 // }
                             }
                         });
-                        // tab.doLayout();
                     });
-                    // mainTabPanel.doLayout();
                 } else {
                     console.log('    success was false (bad)');
                 }
