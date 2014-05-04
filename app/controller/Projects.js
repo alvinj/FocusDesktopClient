@@ -243,8 +243,6 @@ Ext.define('Focus.controller.Projects', {
                 specialkey: function(field, event, options) {
                     console.log('ENTERED specialkey');
                     if (event.getKey() == event.ENTER) {
-                        console.log('    got ENTER key');
-                        console.log('    field value: ' + field.getValue());
                         // var saveBtn = field.up('researchLinkForm').down('button#save');
                         // saveBtn.fireEvent('click', saveBtn, event, options);
                     }                    
@@ -302,6 +300,7 @@ Ext.define('Focus.controller.Projects', {
             columns: 1,
             id: nameOfId,
             itemId: nameOfId,
+            formBind: true,  // NIGHT
             listeners: {
                 // may only be available after the 'load' event; see
                 // http://pritomkumar.blogspot.com/2013/08/extjs-add-checkbox-group-to-panel-on-fly.html
@@ -310,7 +309,7 @@ Ext.define('Focus.controller.Projects', {
                     foo: function (clickedObject, isChecked){
                         console.log(clickedObject);
                         console.log(isChecked);
-                        console.log("Check box check status changed.");
+                        console.log("CHECKBOXGROUP: Check box check status changed.");
                         // var group = Ext.getCmp (nameOfId);
                         // var length = group.items.getCount ();
                         // var isCheck = group.items.items[0].checked;
@@ -319,7 +318,7 @@ Ext.define('Focus.controller.Projects', {
                 change: {
                     element: 'el', //bind to the underlying el property on the panel
                     foo: function (field, newVal, oldVal){
-                        console.log('CHNAGE!');
+                        console.log('CHECKBOXGROUP: CHANGE!');
                         console.log(field);
                     }
                 },
@@ -366,7 +365,9 @@ Ext.define('Focus.controller.Projects', {
             checked: false,
             // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
             listeners: {
-                // TODO 1st param isn't really a checkbox, it's a boxlabel
+                // NIGHT: this really affects `this.boxLabel`
+                //scope: this,
+
                 change: function(checkbox, newValue, oldValue, eOpts) {
                     if (newValue === true) {
                         //
@@ -374,7 +375,9 @@ Ext.define('Focus.controller.Projects', {
                         // TODO leaving off here
                         //
                         //
-                        // VP.util.Utils.dumpObject(this);
+                        console.log('TRYING TO DUMP CHECKBOX');
+                        // VP.util.Utils.dumpObject(checkbox);
+                        console.log('this.boxLabel: ' + this.boxLabel);
                         me.handleCheckboxClickedEvent(checkbox, this.boxLabel);
                     }
                 },
@@ -382,7 +385,6 @@ Ext.define('Focus.controller.Projects', {
                     component.getEl().on('click', function(event) {
                         //VP.util.Utils.dumpObject(component.getEl().down('.boxLabelCls').dom.innerText);
                         event.stopEvent();
-                        //VP.util.Utils.dumpObject(event);
                         var taskText = component.getEl().down('.'+checkboxFieldClass).dom.innerText;
                         // a hack to figure out whether the user clicked the hyperlink or checkbox
                         var objectType = Object.prototype.toString.call(event.target);
@@ -405,24 +407,30 @@ Ext.define('Focus.controller.Projects', {
     },
 
     handleCheckboxClickedEvent: function(checkbox, checkboxHyperlinkText) {
+        
+        // NIGHT
         var linkText = this.getTextFromHyperlink(checkboxHyperlinkText);
-        //var formPanel = checkbox.up('form');
+        // var linkText = 'caca';
+        var formPanel = checkbox.up('form');
 
-        var formPanel = getTaskListPanel().down('form');
-        //VP.util.Utils.dumpObject(checkbox);
+        //VP.util.Utils.dumpObject(formPanel);
 
         console.log('formPanel: ' + formPanel);
+        console.log(formPanel.getForm().getValues());
+        console.log('projectId: ' + formPanel.getForm().findField('projectId').getSubmitValue());
         checkbox.hide();
         // TODO remove from store
         Ext.Ajax.request({
             url: 'server/tasks/updateStatus',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            params: {
-                "projectId" : formPanel.projectId.getValue(),
+            // formPanel.getForm().findField('NamePropertyValue').getSubmitValue(
+            params: Ext.JSON.encode({
+                // "projectId" : formPanel.projectId.getValue(),
+                "projectId" : formPanel.getForm().findField('projectId').getSubmitValue(),
                 "task": linkText,
                 "status": "f"
-            },
+            }),
             success: function(conn, response, options, eOpts) {
                 var result = Packt.util.Util.decodeJSON(conn.responseText);
                 if (result.success) {
@@ -445,7 +453,12 @@ Ext.define('Focus.controller.Projects', {
 
     addCheckboxToGroup: function(group, checkbox) {
         //var col = group.panel.items.get(group.items.getCount() % group.panel.items.getCount());
+        
+        // OLD, WORKED (LATE NIGHT)
         group.items.add(checkbox);
+
+        group.add(checkbox);
+
         //col.add(checkbox);
         //group.panel.doLayout();
     },
