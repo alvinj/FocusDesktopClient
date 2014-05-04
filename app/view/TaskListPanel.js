@@ -10,10 +10,13 @@ Ext.define('Focus.view.TaskListPanel', {
     //renderTo: Ext.getBody(),  // TODO this creates two horizontal lines in the panel (which is bad)
     style: 'margin: 50px;',   // NOTE can also use bodyStyle
 
+    // this works, but i want to change this ui so the textfield stays put at the top
+    autoScroll: true,
+
     items: [
         {
             xtype: 'panel',
-            layout: 'fit'
+            layout: 'fit',
         }
     
     ]

@@ -22,6 +22,10 @@ Ext.define('Focus.controller.Projects', {
         }
     ],
 
+    //
+    // TODO this code needs a lot of cleanup/refactoring
+    //
+
     // note: this is called before the user logs in (currently)
     init: function(application) {
         this.control({
@@ -362,22 +366,77 @@ Ext.define('Focus.controller.Projects', {
             checked: false,
             // found: http://stackoverflow.com/questions/15160466/enable-disable-text-field-on-checkbox-selection-extjs
             listeners: {
+                // TODO 1st param isn't really a checkbox, it's a boxlabel
                 change: function(checkbox, newValue, oldValue, eOpts) {
-                    console.log('CHECKBOX CHANGED');
-                    console.log(this.boxLabel);  // this works
+                    if (newValue === true) {
+                        //
+                        // 
+                        // TODO leaving off here
+                        //
+                        //
+                        // VP.util.Utils.dumpObject(this);
+                        me.handleCheckboxClickedEvent(checkbox, this.boxLabel);
+                    }
                 },
                 render: function(component) {
                     component.getEl().on('click', function(event) {
                         //VP.util.Utils.dumpObject(component.getEl().down('.boxLabelCls').dom.innerText);
-                        //console.log(component.getEl().down('.boxLabelCls').dom.innerText);
                         event.stopEvent();
+                        //VP.util.Utils.dumpObject(event);
                         var taskText = component.getEl().down('.'+checkboxFieldClass).dom.innerText;
-                        Ext.Msg.alert('Now Working On', taskText); 
+                        // a hack to figure out whether the user clicked the hyperlink or checkbox
+                        var objectType = Object.prototype.toString.call(event.target);
+                        if (objectType.indexOf("HTMLAnchorElement") > -1) {
+                            // user clicked on the hyperlink
+                            Ext.Msg.alert('Now Working On', taskText); 
+                        } else {
+                            // user clicked the checkbox (HTMLInputElement)
+                        }
                     });    
                 }
             }
         });
         return checkbox;
+    },
+
+    // expects something like '<a href="#" class="taskName">Get tabs working</a>'
+    getTextFromHyperlink: function(linkText) {
+        return linkBody = linkText.match(/<a [^>]+>([^<]+)<\/a>/)[1];  // returns an array
+    },
+
+    handleCheckboxClickedEvent: function(checkbox, checkboxHyperlinkText) {
+        var linkText = this.getTextFromHyperlink(checkboxHyperlinkText);
+        //var formPanel = checkbox.up('form');
+
+        var formPanel = getTaskListPanel().down('form');
+        //VP.util.Utils.dumpObject(checkbox);
+
+        console.log('formPanel: ' + formPanel);
+        checkbox.hide();
+        // TODO remove from store
+        Ext.Ajax.request({
+            url: 'server/tasks/updateStatus',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            params: {
+                "projectId" : formPanel.projectId.getValue(),
+                "task": linkText,
+                "status": "f"
+            },
+            success: function(conn, response, options, eOpts) {
+                var result = Packt.util.Util.decodeJSON(conn.responseText);
+                if (result.success) {
+                    Packt.util.Alert.msg('Success!', 'Task was removed from the server.');
+                    // formPanel.doLayout();
+                } else {
+                    Packt.util.Util.showErrorMsg(result.msg);
+                }
+            },
+            failure: function(conn, response, options, eOpts) {
+                // TODO get the 'msg' from the json and display it
+                Packt.util.Util.showErrorMsg(conn.responseText);
+            }
+        });
     },
 
     insertCheckboxIntoGroup: function(group, checkbox) {
