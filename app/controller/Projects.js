@@ -260,6 +260,17 @@ Ext.define('Focus.controller.Projects', {
                 var tasksStore = me.getTasksStore();
                 // if the form is valid, send the data
                 if (formPanel.getForm().isValid()) {
+
+                    // don't add the task if it already exists in this project
+                    var projectId = me.getProjectIdFromFormPanel(formPanel);
+                    if (me.taskAlreadyExistsInProject(projectId, textfield.getValue())) {
+                        // TODO improve the focus-handling here
+                        textfield.setValue();
+                        Packt.util.Util.showErrorMsg('Task already exists in project');
+                        textfield.focus(false, 250);
+                        return;
+                    }
+
                     Ext.Ajax.request({
                         url: 'server/tasks/add',
                         method: 'POST',
@@ -268,7 +279,7 @@ Ext.define('Focus.controller.Projects', {
                         success: function(conn, response, options, eOpts) {
                             var result = Packt.util.Util.decodeJSON(conn.responseText);
                             if (result.success) {
-                                Packt.util.Alert.msg('Success!', 'Task was saved.');
+                                // Packt.util.Alert.msg('Success!', 'Task was saved.');
                                 // TODO do whatever is needed to add the checkbox to the list of checkboxes
                                 // TODO should also sync up the store
                                 // tasksStore.load();
@@ -278,7 +289,9 @@ Ext.define('Focus.controller.Projects', {
                                 var group = formPanel.down('checkboxgroup');
                                 me.insertCheckboxIntoGroup(group, checkbox);
                                 textfield.setValue(); //clear
+                                tasksStore.reload();
                                 formPanel.doLayout();
+
                             } else {
                                 Packt.util.Util.showErrorMsg(result.msg);
                             }
@@ -292,7 +305,25 @@ Ext.define('Focus.controller.Projects', {
             }
         });
     },
-    
+
+    getProjectIdFromFormPanel: function(formPanel) {
+        return formPanel.getForm().findField('projectId').getSubmitValue();
+    },
+
+    // check to see if the task description is already in the store for this project
+    taskAlreadyExistsInProject: function(projectId, taskName) {
+        var tasksStore = this.getTasksStore();
+        var matchIsFound = false;
+        tasksStore.each(function(record) {
+            var stringsAreEqual = VP.util.Utils.stringsAreEqualIgnoringCase(record.data.description, taskName);
+            if (stringsAreEqual && (record.data.projectId == projectId)) {
+                matchIsFound = true;  // don't use 'me' or 'this' here
+                return false;  // this breaks out of the 'each' loop
+            }
+        });
+        return matchIsFound;
+    },
+
     createCheckboxGroup: function(nameOfId) {
         var grp = new Ext.form.CheckboxGroup({
             //fieldLabel: 'CheckboxGroup',
@@ -407,26 +438,17 @@ Ext.define('Focus.controller.Projects', {
     },
 
     handleCheckboxClickedEvent: function(checkbox, checkboxHyperlinkText) {
-        
-        // NIGHT
         var linkText = this.getTextFromHyperlink(checkboxHyperlinkText);
-        // var linkText = 'caca';
         var formPanel = checkbox.up('form');
-
-        //VP.util.Utils.dumpObject(formPanel);
-
-        console.log('formPanel: ' + formPanel);
+        // debug
         console.log(formPanel.getForm().getValues());
-        console.log('projectId: ' + formPanel.getForm().findField('projectId').getSubmitValue());
         checkbox.hide();
         // TODO remove from store
         Ext.Ajax.request({
             url: 'server/tasks/updateStatus',
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // formPanel.getForm().findField('NamePropertyValue').getSubmitValue(
             params: Ext.JSON.encode({
-                // "projectId" : formPanel.projectId.getValue(),
                 "projectId" : formPanel.getForm().findField('projectId').getSubmitValue(),
                 "task": linkText,
                 "status": "f"
@@ -434,8 +456,7 @@ Ext.define('Focus.controller.Projects', {
             success: function(conn, response, options, eOpts) {
                 var result = Packt.util.Util.decodeJSON(conn.responseText);
                 if (result.success) {
-                    Packt.util.Alert.msg('Success!', 'Task was removed from the server.');
-                    // formPanel.doLayout();
+                    //Packt.util.Alert.msg('Success!', 'Task was removed from the server.');
                 } else {
                     Packt.util.Util.showErrorMsg(result.msg);
                 }
@@ -453,14 +474,9 @@ Ext.define('Focus.controller.Projects', {
 
     addCheckboxToGroup: function(group, checkbox) {
         //var col = group.panel.items.get(group.items.getCount() % group.panel.items.getCount());
-        
-        // OLD, WORKED (LATE NIGHT)
-        group.items.add(checkbox);
-
         group.add(checkbox);
-
-        //col.add(checkbox);
-        //group.panel.doLayout();
+        // group.items.add(checkbox);  // old approach
+        // group.panel.doLayout();
     },
 
     // Usage: var string2 = stringWithoutSpaces(string1);
@@ -523,7 +539,6 @@ Ext.define('Focus.controller.Projects', {
     },
 
     onMainTabPanelAfterRender: function(tabPanel, options) {
-        console.log('ENTERED onMainTabPanelAfterRender');
         tabPanel.setActiveTab(0);
     }
 

@@ -26,6 +26,14 @@ Ext.define('VP.util.Utils', {
 		// removes any character not in [a-zA-Z_0-9]
 		stripNonWordCharacters: function(str) {
 		    return str.replace(/\W/g, '_');
+		},
+
+		stringsAreEqualIgnoringCase: function(s1, s2) {
+			if (s1.trim().toLowerCase() == s2.trim().toLowerCase()) {
+				return true;
+			} else {
+				return false;
+			}
 		}
 
     }
