@@ -12,13 +12,18 @@ Ext.define('Focus.controller.Projects', {
 
     views: [
         'MainTabPanel',
-        'TaskListPanel'
+        'TaskListPanel',
+        'MainViewport'
     ],
 
     refs: [
         {
             ref: 'mainTabPanel',
             selector: 'mainTabPanel'
+        },
+        {
+            ref: 'mainViewport',
+            selector: 'mainViewport'
         }
     ],
 
@@ -30,6 +35,9 @@ Ext.define('Focus.controller.Projects', {
         this.control({
             // the MainTabPanel is rendered when the MainViewport is rendered
             // by the Login controller.
+            "mainViewport": {
+                afterrender: this.onMainViewportAfterRender,
+            },
             "mainTabPanel": {
                 render: this.onMainTabPanelRender,
                 afterrender: this.onMainTabPanelAfterRender,
@@ -65,6 +73,16 @@ Ext.define('Focus.controller.Projects', {
         //     console.log('  TEXTFIELD WAS NULL');            
         // }
         // //textfield.focus(false, 200);
+    },
+
+    // TODO this works, putting focus on the 0th tab, but it's obviously not ideal.
+    // (but i can't get it to work any other way)
+    onMainViewportAfterRender: function(viewport, options) {
+        var tabPanel = viewport.down('tabpanel');
+        var task = new Ext.util.DelayedTask(function() {
+            tabPanel.setActiveTab(0);
+        });
+        task.delay(250);
     },
 
     onTaskListPanelAfterRender: function(panel, options) {
