@@ -246,6 +246,7 @@ Ext.define('Focus.controller.Projects', {
             labelWidth: 50,
             labelStyle: 'font-size: 16px;',
             width: 500,
+            style: 'margin-bottom: 18px',
             listeners: {
                 // this works, putting focus in the textfield
                 afterrender: function(field) {
@@ -489,12 +490,14 @@ Ext.define('Focus.controller.Projects', {
     },
 
     handleCheckboxClickedEvent: function(checkbox, checkboxHyperlinkText) {
+        var me = this;
         var linkText = this.getTextFromHyperlink(checkboxHyperlinkText);
         var formPanel = checkbox.up('form');
         // debug
         console.log(formPanel.getForm().getValues());
         checkbox.hide();
         // TODO remove from store
+        var projectId = formPanel.getForm().findField('projectId').getSubmitValue();
         Ext.Ajax.request({
             url: 'server/tasks/updateStatus',
             method: 'POST',
@@ -507,7 +510,11 @@ Ext.define('Focus.controller.Projects', {
             success: function(conn, response, options, eOpts) {
                 var result = Packt.util.Util.decodeJSON(conn.responseText);
                 if (result.success) {
-                    //Packt.util.Alert.msg('Success!', 'Task was removed from the server.');
+                    // get the task out of the store
+                    var tasksStore = me.getTasksStore();
+                    var task = me.getTaskFromStore(projectId, linkText, tasksStore);
+                    tasksStore.remove(task);
+                    tasksStore.reload();
                 } else {
                     Packt.util.Util.showErrorMsg(result.msg);
                 }
@@ -519,6 +526,22 @@ Ext.define('Focus.controller.Projects', {
         });
     },
 
+    getTaskFromStore: function(projectId, taskName, tasksStore) {
+        var matchIsFound = false;
+        console.log('projectId: ' + projectId);
+        console.log('taskName:  ' + taskName);
+        var task = null;
+        tasksStore.each(function(record) {
+            var stringsAreEqual = VP.util.Utils.stringsAreEqualIgnoringCase(record.data.description, taskName);
+            console.log('stringsAreEqual: ' + stringsAreEqual);
+            if (stringsAreEqual && (record.data.projectId == projectId)) {
+                task = record;
+                return false;
+            }
+        });
+        return task;
+    },
+    
     insertCheckboxIntoGroup: function(group, checkbox) {
         group.items.insert(0, checkbox);
     },
