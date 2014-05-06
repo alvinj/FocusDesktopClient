@@ -422,61 +422,8 @@ Ext.define('Focus.controller.Projects', {
                         if (objectType.indexOf("HTMLAnchorElement") > -1) {
                             // user clicked on the hyperlink
                             //Ext.Msg.alert('Now Working On', taskText); 
-                            var win = new Ext.Window({
-                                title: 'Now Working On',
-                                width: 560,
-                                height: 340,
-                                layout: {
-                                    type: 'fit',
-                                    align: 'middle',
-                                    pack: 'center'
-                                },
-                                style: {
-                                    'font-size': '24px',
-                                    'background-color': '#f0f0f9'
-                                },
-                                items: [
-                                    {
-                                        xtype: 'container',
-                                        bodyPadding: 15,
-                                        style: {
-                                            'font-size': '24px',
-                                            'padding': '30px',
-                                            'padding-top': '14px',
-                                            'color': '#444',
-                                            'line-height': '1.4em',
-                                            'background-color': '#f0f0f9'
-                                        },
-                                        html: '<p>' + taskText + '</p>'
-                                    }
-                                ],
-                                // dock a toolbar with Cancel and Submit buttons to the bottom of the view
-                                dockedItems: [
-                                    {
-                                        xtype: 'toolbar',
-                                        dock: 'bottom',
-                                        items: [
-                                            {
-                                                xtype: 'tbfill'
-                                            },
-                                            {
-                                                xtype: 'button',
-                                                itemId: 'close',
-                                                text: 'Close',
-                                                listeners : {
-                                                    click: function () { 
-                                                        win.close();
-                                                    }
-                                                }
-                                            },
-                                            {
-                                                xtype: 'tbfill'
-                                            }
-                                        ]
-                                    }
-                                ],
-                            });
-                            win.show();
+                            var window = me.createWindow(taskText);
+                            window.show();
                         } else {
                             // user clicked the checkbox (HTMLInputElement)
                         }
@@ -486,6 +433,67 @@ Ext.define('Focus.controller.Projects', {
         });
         return checkbox;
     },
+
+    createWindow: function(text) {
+        var window = new Ext.Window({
+            title: 'Now Working On',
+            width: 560,
+            height: 340,
+            layout: {
+                type: 'fit',
+                align: 'middle',
+                pack: 'center'
+            },
+            style: {
+                'font-size': '24px',
+                'background-color': '#f0f0f9'
+            },
+            items: [
+                {
+                    xtype: 'container',
+                    bodyPadding: 15,
+                    style: {
+                        'font-size': '24px',
+                        'padding': '30px',
+                        'padding-top': '14px',
+                        'color': '#444',
+                        'line-height': '1.4em',
+                        'background-color': '#f0f0f9'
+                    },
+                    html: '<p>' + text + '</p>'
+                }
+            ],
+            // dock a toolbar with Cancel and Submit buttons to the bottom of the view
+            dockedItems: [
+                {
+                    xtype: 'toolbar',
+                    dock: 'bottom',
+                    items: [
+                        {
+                            xtype: 'tbfill'
+                        },
+                        {
+                            xtype: 'button',
+                            itemId: 'close',
+                            text: 'Close',
+                            listeners : {
+                                click: function () { 
+                                    window.close();
+                                }
+                            }
+                        },
+                        {
+                            xtype: 'tbfill'
+                        }
+                    ]
+                }
+            ],
+        });
+        return window;
+    },
+
+
+
 
     // expects something like '<a href="#" class="taskName">Get tabs working</a>'
     getTextFromHyperlink: function(linkText) {
