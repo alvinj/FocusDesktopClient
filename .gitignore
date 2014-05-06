@@ -2,3 +2,5 @@
 .architect
 .sass-cache/
 .sencha
+build/production
+build/temp
