@@ -20,11 +20,11 @@
 }
 
 .x-splash-icon {
-    background-image: url('../images/finance-logo.jpg') !important;
+    background-image: url('../images/focus-logo.jpg') !important;
     margin-top: -30px;
     margin-bottom: 15px;
-    height: 160px;
-    width: 240px;
+    height: 120px;
+    width: 180px;
 }
 
 /** message box */
