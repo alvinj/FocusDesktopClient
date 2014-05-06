@@ -146,8 +146,6 @@ Ext.define('Focus.controller.Projects', {
         // because the load process can fail, and you need to handle that failure
         tasksStore.load({
             callback: function(records, operation, success) {
-                console.log('tasksStore.load called');
-                console.log('    success:   ' + success);
 
                 // clear the panel
                 panel.removeAll();
@@ -160,28 +158,25 @@ Ext.define('Focus.controller.Projects', {
                 panel.add(me.createHiddenProjectIdField(tabName));
                 panel.add(me.createHiddenStatusField());
 
-                if (success == true) {
-                    // MAKE THE CHECKBOXES
-                    var groupItemId = me.makeGroupItemIdName(tabName);
-                    var group = me.createCheckboxGroup(groupItemId);
-                    //panel.body.update(group);
+                // create checkboxgroup; do this outside the 'success' loop below
+                // so the group always exists; this is needed for the case where
+                // there are no tasks for a project
+                var groupItemId = me.makeGroupItemIdName(tabName);
+                var group = me.createCheckboxGroup(groupItemId);
+
+                // add chekboxes to the group
+                if (success === true) {
                     var count = 1;
-                    // TODO i don't know how to reference a method in this class/object
-                    // inside a block like this; a 'this' reference does not work by itself;
-                    // if i remember right, i need to pass something else to the function.
-                    console.log('ABOUT TO LOOP OVER TASK STORE ITEMS');
-                    console.log('TASK STORE COUNT: ' + tasksStore.count());
                     tasksStore.each(function(record) {
                         var task = record.data.description;
-                        console.log('TASK: ' + task);
                         var checkbox = me.createCheckbox(task, count++);
                         me.addCheckboxToGroup(group, checkbox);
                     });
-                    panel.add(group);
-                    panel.doLayout();
                 } else {
                     // the store didn't load, anything to do?
                 }
+                panel.add(group);
+                panel.doLayout();
             }
             // scope: this,
         });
@@ -241,10 +236,8 @@ Ext.define('Focus.controller.Projects', {
                 },
                 // ADDOption1
                 specialkey: function(field, event, options) {
-                    console.log('ENTERED specialkey');
                     if (event.getKey() == event.ENTER) {
-                        // var saveBtn = field.up('researchLinkForm').down('button#save');
-                        // saveBtn.fireEvent('click', saveBtn, event, options);
+                        // could use this function, but i used addTextfieldListener instead
                     }                    
                 }
             }
@@ -279,10 +272,6 @@ Ext.define('Focus.controller.Projects', {
                         success: function(conn, response, options, eOpts) {
                             var result = Packt.util.Util.decodeJSON(conn.responseText);
                             if (result.success) {
-                                // Packt.util.Alert.msg('Success!', 'Task was saved.');
-                                // TODO do whatever is needed to add the checkbox to the list of checkboxes
-                                // TODO should also sync up the store
-                                // tasksStore.load();
                                 var description = textfield.getValue();
                                 var checkbox = me.createCheckbox(description, me.createLegalIdNameFromString(description));
                                 // get the checkboxgroup and add the checkbox
@@ -326,12 +315,10 @@ Ext.define('Focus.controller.Projects', {
 
     createCheckboxGroup: function(nameOfId) {
         var grp = new Ext.form.CheckboxGroup({
-            //fieldLabel: 'CheckboxGroup',
-            //hideLabel: true,
             columns: 1,
             id: nameOfId,
             itemId: nameOfId,
-            formBind: true,  // NIGHT
+            formBind: true,
             listeners: {
                 // may only be available after the 'load' event; see
                 // http://pritomkumar.blogspot.com/2013/08/extjs-add-checkbox-group-to-panel-on-fly.html
@@ -353,22 +340,9 @@ Ext.define('Focus.controller.Projects', {
                         console.log(field);
                     }
                 },
-                // works
                 afterrender: function(foo) {
                     console.log('afterrender');
                 },
-                // change: {
-                //     element: 'el', //bind to the underlying el property on the panel
-                //     fn: function(cb, checked) {
-                //         //Ext.getCmp('myTextField').setDisabled(!checked);
-                //         Ext.Msg.alert('You changed something'); 
-                //         console.log('CHECKED: ' + checked);
-                //     },
-                //     fn2: function(cb, newVal, oldVal) {
-                //         //Ext.getCmp('myTextField').setDisabled(!checked);
-                //         console.log('CHECKED: ' + newVal);
-                //     }
-                // },
                 click: {
                     element: 'el', //bind to the underlying el property on the panel
                     fn: function(){ 
@@ -422,7 +396,7 @@ Ext.define('Focus.controller.Projects', {
                         if (objectType.indexOf("HTMLAnchorElement") > -1) {
                             // user clicked on the hyperlink
                             //Ext.Msg.alert('Now Working On', taskText); 
-                            var window = me.createWindow(taskText);
+                            var window = me.createNowWorkingOnWindow(taskText);
                             window.show();
                         } else {
                             // user clicked the checkbox (HTMLInputElement)
@@ -434,7 +408,7 @@ Ext.define('Focus.controller.Projects', {
         return checkbox;
     },
 
-    createWindow: function(text) {
+    createNowWorkingOnWindow: function(text) {
         var window = new Ext.Window({
             title: 'Now Working On',
             width: 560,
@@ -491,9 +465,6 @@ Ext.define('Focus.controller.Projects', {
         });
         return window;
     },
-
-
-
 
     // expects something like '<a href="#" class="taskName">Get tabs working</a>'
     getTextFromHyperlink: function(linkText) {
@@ -566,9 +537,7 @@ Ext.define('Focus.controller.Projects', {
         var projectsStore = this.getProjectsStore();
         projectsStore.load({
             callback: function(records, operation, success) {
-                console.log('projectsStore.load called');
-                console.log('    success:      ' + success);
-                if (success == true) {
+                if (success === true) {
                     projectsStore.each(function(record) {
                         //tabsArray.push(record.data.name);
                         var tab = mainTabPanel.add({
