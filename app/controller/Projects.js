@@ -26,14 +26,8 @@ Ext.define('Focus.controller.Projects', {
     // TODO this code needs a lot of cleanup/refactoring
     //
 
-    // note: this is called before the user logs in (currently)
     init: function(application) {
         this.control({
-            // lookup the 'My Stocks' button on the menu and add a click handler.
-            // the name 'basic-panels' is the xtype declared in view.menu.Menu.
-            // "basic-panels button#myStocks": {
-            //     click: this.onMyStocksButtonClick
-            // },
             // the MainTabPanel is rendered when the MainViewport is rendered
             // by the Login controller.
             "mainTabPanel": {
@@ -164,14 +158,9 @@ Ext.define('Focus.controller.Projects', {
                 var groupItemId = me.makeGroupItemIdName(tabName);
                 var group = me.createCheckboxGroup(groupItemId);
 
-                // add chekboxes to the group
+                // add checkboxes to the group
                 if (success === true) {
-                    var count = 1;
-                    tasksStore.each(function(record) {
-                        var task = record.data.description;
-                        var checkbox = me.createCheckbox(task, count++);
-                        me.addCheckboxToGroup(group, checkbox);
-                    });
+                    me.addCheckboxesToGroup(tasksStore, group);
                 } else {
                     // the store didn't load, anything to do?
                 }
@@ -181,6 +170,16 @@ Ext.define('Focus.controller.Projects', {
             // scope: this,
         });
         console.log('COUNT = ' + tasksStore.count());
+    },
+
+    addCheckboxesToGroup: function(tasksStore, group) {
+        var me = this;
+        var count = 1;
+        tasksStore.each(function(record) {
+            var task = record.data.description;
+            var checkbox = me.createCheckbox(task, count++);
+            me.addCheckboxToGroup(group, checkbox);
+        });
     },
 
     // get the projectId from the projectName
@@ -531,24 +530,26 @@ Ext.define('Focus.controller.Projects', {
      * from 'mastering', p. 109
      */
     onMainTabPanelRender: function(component, options) {
-        console.log('ENTERED onMainTabPanelRender, trying to get ProjectsStore');
+        var me = this;
         var mainTabPanel = this.getMainTabPanel();
-        //var tabsArray = new Array();
         var projectsStore = this.getProjectsStore();
         projectsStore.load({
             callback: function(records, operation, success) {
                 if (success === true) {
+                    var count = 0;
                     projectsStore.each(function(record) {
-                        //tabsArray.push(record.data.name);
+                        // do this to handle multi-word names
+                        var idName = me.createLegalIdNameFromString(record.data.name);
                         var tab = mainTabPanel.add({
                             xtype: 'taskListPanel',
+                            activeTab: 0,
                             closable: false,
                             title: record.data.name, // the text on the tab
-                            alias: 'widget.' + record.data.name.toLowerCase(),
-                            iconCls: record.data.name.toLowerCase(),  // renders 'class="finance"'
+                            alias: 'widget.' + idName,
+                            iconCls: idName,
                             listeners : {
                                 click: function () { 
-                                    console.log("YOU CLICKED A TAB !!!");
+                                    // console.log("YOU CLICKED A TAB !!!");
                                 },
                                 // beforeclose : function(tab) {
                                 //     tab.removeAll();
@@ -565,13 +566,15 @@ Ext.define('Focus.controller.Projects', {
         });
 
         mainTabPanel.setActiveTab(0);
-        mainTabPanel.doLayout();
+        // mainTabPanel.doLayout();
         // TODO i may need to create these tabs as an array so i can
         // access them, and also know which one is in the foreground
     },
 
     onMainTabPanelAfterRender: function(tabPanel, options) {
-        tabPanel.setActiveTab(0);
+        console.log('ENTERED onMainTabPanelAfterRender');
+        // VP.util.Utils.dumpObject(tabPanel);
+        // tabPanel.setActiveTab(1);
     }
 
 });
